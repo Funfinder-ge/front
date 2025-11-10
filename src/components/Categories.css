@@ -1,0 +1,230 @@
+.categories {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.catmovie {
+  background-color: #570015;
+  border-color: #0000;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 0.8px;
+  box-shadow: #00000020 0px 3px 5px 0px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 6px 12px;
+  text-align: center;
+  width: calc(50% - 10px);
+}
+
+.session {
+  background-color: #c3c3c300;
+  border-color: #ddd;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 0.8px;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 6px 12px;
+  text-align: center;
+  width: calc(50% - 10px);
+}
+
+.session:hover {
+  background-color: rgba(195, 195, 195, 0.34);
+  color: #000;
+}
+
+.session:focus,
+.session:active {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.catmovie:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+.movie-cards {
+  margin-top: 20px;
+  display: flex;
+  justify-content: left;
+  flex-wrap: wrap;
+}
+
+.movie-card {
+  background-color: #f1f1f1;
+  border-color: #fff;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: 4.8px;
+  color: #333;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 10px;
+  text-align: left;
+  height: fit-content;
+}
+
+.movie-card .title {
+  font-weight: 700;
+  line-height: 17.6px;
+  margin: 10px 0px 0px;
+  text-align: left;
+   width: 100%; /* ან კონკრეტული მნიშვნელობა, eg: 180px */
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-card .movtypes {
+  display: flex;
+  justify-content: left;
+  gap: 2px;
+}
+
+.movie-card .movtype {
+  background-color: #570015;
+  border-radius: 2px;
+  color: #fff;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14.2857px;
+  text-align: center;
+  text-transform: uppercase;
+  width: fit-content;
+  padding: 0 5px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.movtimes {
+  width: 100%;
+  border-radius: 0px 0px 3px 3px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.movtime {
+  font-size: 14px;
+  line-height: 20px;
+  width: 45px;
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.movtime:hover {
+  background: #570015;
+  box-shadow: inset 0 0 2px black;
+}
+
+.movtime > div {
+  line-height: normal;
+}
+
+.movie-image {
+  width: 100%;
+  height: 227px;
+  position: relative;
+}
+
+.movie-image img {
+  width: 100%;
+  height: 100%;
+}
+
+.hovcontext {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  top: 0;
+  left: 0;
+
+  display: none;
+}
+
+.movinfo:hover .hovcontext {
+  display: block;
+}
+
+.hovcontext .trailer,
+.hovcontext .full,
+.hovcontext .message {
+  background-color: #000;
+  border-radius: 5px;
+  box-shadow: #fff 0px 0px 1px 0px;
+  color: #570015;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 35.0375px 17.525px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #000;
+}
+.hovcontext .trailer:hover,
+.hovcontext .full:hover,
+.hovcontext .message:hover {
+  border: 1px solid #570015;
+}
+
+.uhovcontext {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  top: 0;
+  left: 0;
+
+  display: none;
+}
+
+.movinfo:hover .uhovcontext {
+  display: block;
+}
+
+.uhovcontext .trailer,
+.uhovcontext .full,
+.uhovcontext .message {
+  background-color: #000;
+  border-radius: 5px;
+  box-shadow: #fff 0px 0px 1px 0px;
+  color: #570015;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 15.0375px 17.525px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #000;
+}
+.uhovcontext .trailer:hover,
+.uhovcontext .full:hover,
+.uhovcontext .message:hover {
+  border: 1px solid #570015;
+}
+
+.soon-title {
+  background-color: #f1f1f1;
+  border-radius: 5px 5px 0px 0px;
+  color: #070707;
+  font-size: 25px;
+  line-height: 35.7143px;
+  margin: 20px 0;
+  padding: 15px 30px;
+  text-transform: uppercase;
+}

@@ -1,0 +1,77 @@
+.main-slider {
+  width: 100%;
+  height: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.slide-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-content.slide-clickable:hover {
+  transform: scale(1.02);
+  opacity: 0.95;
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: white;
+  text-align: center;
+}
+
+.slide-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.slide-description {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.slide-button {
+  background: #570015;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.slide-button:hover {
+  background: #3d000f;
+}
+
+.swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  opacity: 1;
+}
+
+.swiper-pagination-bullet-active {
+  background: #570015;
+  width: 24px;
+  border-radius: 10px;
+}

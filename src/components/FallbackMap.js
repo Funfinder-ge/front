@@ -1,0 +1,541 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  TextField,
+  InputAdornment,
+  CircularProgress,
+  Alert,
+  Card,
+  CardContent,
+  Chip
+} from '@mui/material';
+import {
+  MyLocation,
+  Search,
+  Place,
+  Navigation,
+  ZoomIn,
+  ZoomOut,
+  CenterFocusStrong,
+  CheckCircle
+} from '@mui/icons-material';
+
+/**
+ * Fallback Map Component
+ * Shows a working map interface when Google Maps API is not available
+ */
+const FallbackMap = ({ 
+  center = { lat: 41.6500, lng: 41.6333 },
+  onLocationSelect,
+  currentLocation = null,
+  height = '400px',
+  showSearch = true,
+  showControls = true,
+  style = {}
+}) => {
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [mapCenter, setMapCenter] = useState(center);
+  const [zoom, setZoom] = useState(13);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const mapRef = useRef(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Initialize map center when prop changes
+  useEffect(() => {
+    setMapCenter(center);
+  }, [center]);
+
+  // Simulate map loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMapLoaded(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle map click
+  const handleMapClick = (event) => {
+    try {
+      // Get click position relative to the map container
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      
+      // Convert click position to approximate coordinates
+      const latOffset = ((y - rect.height / 2) / rect.height) * 0.01;
+      const lngOffset = ((x - rect.width / 2) / rect.width) * 0.01;
+      
+      const lat = mapCenter.lat - latOffset;
+      const lng = mapCenter.lng + lngOffset;
+      
+      // Validate coordinates
+      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        throw new Error('Invalid coordinates');
+      }
+      
+      const location = {
+        lat: lat,
+        lng: lng,
+        address: `შერჩეული მდებარეობა (${lat.toFixed(6)}, ${lng.toFixed(6)})`
+      };
+      
+      setSelectedLocation(location);
+      onLocationSelect && onLocationSelect(location);
+    } catch (error) {
+      console.error('Error handling map click:', error);
+      setError('მდებარეობის არჩევა ვერ მოხერხდა');
+    }
+  };
+
+  // Handle search
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simulate search results
+      const mockResults = [
+        {
+          lat: mapCenter.lat + (Math.random() - 0.5) * 0.01,
+          lng: mapCenter.lng + (Math.random() - 0.5) * 0.01,
+          address: searchQuery,
+          fullAddress: `${searchQuery}, ბათუმი, საქართველო`
+        }
+      ];
+      
+      setSearchResults(mockResults);
+    } catch (err) {
+      setError('ძიება ვერ მოხერხდა');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle search result selection
+  const handleSearchResultSelect = (result) => {
+    setSelectedLocation(result);
+    setMapCenter({ lat: result.lat, lng: result.lng });
+    onLocationSelect && onLocationSelect(result);
+  };
+
+  // Handle current location
+  const handleCurrentLocation = () => {
+    if (currentLocation) {
+      const location = {
+        lat: currentLocation.latitude,
+        lng: currentLocation.longitude,
+        address: 'მიმდინარე მდებარეობა'
+      };
+      setSelectedLocation(location);
+      setMapCenter({ lat: currentLocation.latitude, lng: currentLocation.longitude });
+      onLocationSelect && onLocationSelect(location);
+    }
+  };
+
+  // Map controls
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 1, 20));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleCenterMap = () => {
+    setMapCenter(center);
+  };
+
+  return (
+    <Box sx={{ position: 'relative', ...style }}>
+      {/* Search Bar */}
+      {showSearch && (
+        <Box sx={{ 
+          position: 'absolute', 
+          top: 16, 
+          left: 16, 
+          right: 16, 
+          zIndex: 1000,
+          display: 'flex',
+          gap: 1
+        }}>
+          <TextField
+            fullWidth
+            placeholder="ძებნა ადგილის..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              )
+            }}
+            sx={{ bgcolor: 'white', borderRadius: 1 }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSearch}
+            disabled={loading || !searchQuery.trim()}
+            startIcon={loading ? <CircularProgress size={16} /> : <Search />}
+            sx={{ bgcolor: '#570015', '&:hover': { bgcolor: '#3d000f' } }}
+          >
+            ძებნა
+          </Button>
+        </Box>
+      )}
+
+      {/* Map Container */}
+      <Box
+        ref={mapRef}
+        sx={{
+          width: '100%',
+          height: height,
+          background: `
+            linear-gradient(135deg, #4caf50 0%, #81c784 50%, #a5d6a7 100%),
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px),
+            radial-gradient(circle at 40% 60%, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '100% 100%, 60px 60px, 80px 80px, 100px 100px',
+          position: 'relative',
+          cursor: 'crosshair',
+          borderRadius: 1,
+          overflow: 'hidden',
+          border: '2px solid #1976d2',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          '&:hover': { 
+            boxShadow: '0 6px 12px rgba(0,0,0,0.15)',
+            transform: 'scale(1.01)',
+            transition: 'all 0.3s ease'
+          }
+        }}
+        onClick={handleMapClick}
+      >
+        {/* Map Grid Lines */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          opacity: 0.4
+        }} />
+
+        {/* Simulated Roads */}
+        <Box sx={{
+          position: 'absolute',
+          top: '30%',
+          left: 0,
+          right: 0,
+          height: '4px',
+          bgcolor: '#444',
+          opacity: 0.8,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.3)'
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: '70%',
+          left: 0,
+          right: 0,
+          height: '4px',
+          bgcolor: '#444',
+          opacity: 0.8,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.3)'
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: '30%',
+          width: '4px',
+          bgcolor: '#444',
+          opacity: 0.8,
+          boxShadow: '1px 0 2px rgba(0,0,0,0.3)'
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: '70%',
+          width: '4px',
+          bgcolor: '#444',
+          opacity: 0.8,
+          boxShadow: '1px 0 2px rgba(0,0,0,0.3)'
+        }} />
+
+        {/* Simulated Buildings */}
+        <Box sx={{
+          position: 'absolute',
+          top: '20%',
+          left: '20%',
+          width: '10px',
+          height: '10px',
+          bgcolor: '#2c2c2c',
+          borderRadius: '2px',
+          opacity: 0.8,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.4)'
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: '60%',
+          left: '60%',
+          width: '14px',
+          height: '14px',
+          bgcolor: '#2c2c2c',
+          borderRadius: '2px',
+          opacity: 0.8,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.4)'
+        }} />
+
+        {/* Water Areas */}
+        <Box sx={{
+          position: 'absolute',
+          top: '10%',
+          right: '10%',
+          width: '25%',
+          height: '30%',
+          bgcolor: '#1976d3',
+          borderRadius: '50%',
+          opacity: 0.7,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+        }} />
+
+        {/* Map Center Marker */}
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 12,
+          height: 12,
+          bgcolor: '#f44336',
+          borderRadius: '50%',
+          border: '3px solid white',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          zIndex: 10
+        }} />
+
+        {/* Selected Location Marker */}
+        {selectedLocation && (
+          <Box sx={{
+            position: 'absolute',
+            top: '40%',
+            left: '60%',
+            transform: 'translate(-50%, -50%)',
+            width: 16,
+            height: 16,
+            bgcolor: '#4caf50',
+            borderRadius: '50%',
+            border: '3px solid white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            zIndex: 10,
+            animation: 'pulse 2s infinite'
+          }} />
+        )}
+
+        {/* Map Labels */}
+        <Box sx={{
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          bgcolor: 'rgba(255,255,255,0.9)',
+          borderRadius: 1,
+          p: 1,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <Typography variant="caption" color="text.secondary" display="block">
+            ცენტრი: {mapCenter.lat.toFixed(6)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            ლონგ: {mapCenter.lng.toFixed(6)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            ზუმი: {zoom}x
+          </Typography>
+        </Box>
+
+        {/* Click Instructions */}
+        <Box sx={{
+          position: 'absolute',
+          bottom: 16,
+          left: 16,
+          right: 16,
+          bgcolor: 'rgba(255,255,255,0.9)',
+          borderRadius: 1,
+          p: 2,
+          textAlign: 'center',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <Typography variant="body2" color="text.secondary">
+            დააჭირეთ რუკაზე დანიშნულების არჩევისთვის
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Map Controls */}
+      {showControls && (
+        <Box sx={{ 
+          position: 'absolute', 
+          bottom: 16, 
+          right: 16, 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: 1
+        }}>
+          <IconButton
+            onClick={handleZoomIn}
+            sx={{ bgcolor: 'white', '&:hover': { bgcolor: '#f5f5f5' } }}
+          >
+            <ZoomIn />
+          </IconButton>
+          <IconButton
+            onClick={handleZoomOut}
+            sx={{ bgcolor: 'white', '&:hover': { bgcolor: '#f5f5f5' } }}
+          >
+            <ZoomOut />
+          </IconButton>
+          <IconButton
+            onClick={handleCenterMap}
+            sx={{ bgcolor: 'white', '&:hover': { bgcolor: '#f5f5f5' } }}
+          >
+            <CenterFocusStrong />
+          </IconButton>
+        </Box>
+      )}
+
+      {/* Current Location Button */}
+      {currentLocation && (
+        <Button
+          variant="contained"
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            left: 16,
+            bgcolor: '#570015',
+            '&:hover': { bgcolor: '#3d000f' }
+          }}
+          onClick={handleCurrentLocation}
+          startIcon={<MyLocation />}
+        >
+          მიმდინარე მდებარეობა
+        </Button>
+      )}
+
+      {/* Selected Location Info */}
+      {selectedLocation && (
+        <Card sx={{ 
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          minWidth: 250,
+          bgcolor: 'white',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              <CheckCircle color="success" />
+              <Typography variant="subtitle1" fontWeight="bold">
+                შერჩეული მდებარეობა
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {selectedLocation.address}
+            </Typography>
+            <Box display="flex" gap={1} flexWrap="wrap">
+              <Chip 
+                label={`გრძედი: ${selectedLocation.lat.toFixed(6)}`} 
+                size="small" 
+                color="primary" 
+              />
+              <Chip 
+                label={`განედი: ${selectedLocation.lng.toFixed(6)}`} 
+                size="small" 
+                color="secondary" 
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            ძიების შედეგები
+          </Typography>
+          {searchResults.map((result, index) => (
+            <Card 
+              key={index}
+              sx={{ 
+                p: 2, 
+                mb: 1, 
+                cursor: 'pointer',
+                border: selectedLocation?.lat === result.lat ? '2px solid #570015' : '1px solid #e0e0e0',
+                '&:hover': { bgcolor: '#f5f5f5' }
+              }}
+              onClick={() => handleSearchResultSelect(result)}
+            >
+              <Box display="flex" alignItems="center">
+                <Navigation sx={{ mr: 1, color: 'text.secondary' }} />
+                <Box flex={1}>
+                  <Typography variant="body2" fontWeight="bold">
+                    {result.address}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {result.lat.toFixed(6)}, {result.lng.toFixed(6)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Loading State */}
+      {!mapLoaded && (
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(255,255,255,0.9)',
+          zIndex: 1000
+        }}>
+          <Box textAlign="center">
+            <CircularProgress />
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              რუკის ჩატვირთვა...
+            </Typography>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default FallbackMap;
