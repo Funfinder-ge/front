@@ -6,6 +6,7 @@ const AuthContext = createContext({
   user: null,
   isAuthenticated: false,
   login: () => {},
+  register: () => {},
   loginWithGoogle: () => {},
   logout: () => {},
   updateUser: () => {},
@@ -84,21 +85,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = (googleUserData) => {
-    setUser({
-      name: googleUserData.name,
-      email: googleUserData.email,
-      phone: "+995 000 000 000", // Default phone
-      role: "User",
-      rating: 5,
-      orders: 0,
-      lastLogin: new Date().toISOString(),
-      image: googleUserData.image,
-      googleId: googleUserData.googleId,
-      verified: googleUserData.verified,
-      loginMethod: "google"
-    });
-    return true;
+  const register = async (userData) => {
+    try {
+      console.log('Registration attempt with:', userData);
+      const response = await authApiService.register(userData);
+      console.log('Registration successful:', response);
+      
+      // After registration, automatically login
+      if (response && (response.id || response.firstname || response.email)) {
+        const userInfo = {
+          ...response,
+          loginMethod: "email",
+          lastLogin: new Date().toISOString()
+        };
+        setUser(userInfo);
+        return { success: true, user: userInfo };
+      }
+      
+      return { success: true, message: 'Registration successful. Please login.' };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: error.message || 'Registration failed' };
+    }
+  };
+
+  const loginWithGoogle = async (googleUserData) => {
+    try {
+      const response = await authApiService.loginWithGoogle({
+        name: googleUserData.name,
+        email: googleUserData.email,
+        googleId: googleUserData.googleId,
+        image: googleUserData.image,
+        verified: googleUserData.verified,
+        credential: googleUserData.credential,
+      });
+
+      if (response && (response.id || response.firstname || response.email)) {
+        const userInfo = {
+          ...response,
+          loginMethod: "google",
+          lastLogin: new Date().toISOString(),
+        };
+        setUser(userInfo);
+        return { success: true, user: userInfo };
+      }
+
+      return { success: false, error: 'Google login failed - no user data received' };
+    } catch (error) {
+      console.error('Google login error:', error);
+      return { success: false, error: error.message || 'Google login failed' };
+    }
   };
 
   const logout = async () => {
@@ -116,18 +152,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (userData) => {
-    setUser(prev => ({
-      ...prev,
-      ...userData
-    }));
+  const updateUser = async (userData) => {
+    try {
+      const payload = {
+        firstname: userData.name ?? userData.firstname,
+        lastname: userData.lastname,
+        email: userData.email,
+        mobile: userData.phone ?? userData.mobile,
+        country: userData.country,
+      };
+      Object.keys(payload).forEach(
+        (k) => payload[k] === undefined && delete payload[k]
+      );
+
+      const response = await authApiService.updateProfile(payload);
+      const updated = response?.user || response || {};
+
+      setUser((prev) => ({
+        ...prev,
+        ...payload,
+        name: userData.name ?? payload.firstname ?? prev.name,
+        phone: userData.phone ?? payload.mobile ?? prev.phone,
+        ...updated,
+      }));
+      return { success: true, user: updated };
+    } catch (error) {
+      console.error('updateUser error:', error);
+      return { success: false, error: error.message || 'Update failed' };
+    }
   };
 
-  const updateImage = (imageUrl) => {
-    setUser(prev => ({
-      ...prev,
-      image: imageUrl
-    }));
+  const updateImage = async (imageUrl) => {
+    try {
+      const response = await authApiService.updateProfile({ image: imageUrl });
+      const updated = response?.user || response || {};
+      setUser((prev) => ({
+        ...prev,
+        image: imageUrl,
+        ...updated,
+      }));
+      return { success: true };
+    } catch (error) {
+      console.error('updateImage error:', error);
+      setUser((prev) => ({ ...prev, image: imageUrl }));
+      return { success: false, error: error.message || 'Image update failed' };
+    }
   };
 
   return (
@@ -135,6 +204,7 @@ export const AuthProvider = ({ children }) => {
       user, 
       isAuthenticated: !!user,
       login, 
+      register,
       loginWithGoogle, 
       logout, 
       updateUser, 

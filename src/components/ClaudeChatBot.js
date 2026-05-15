@@ -23,7 +23,7 @@ const ClaudeChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "გამარჯობა! როგორ შემიძლია დაგეხმაროთ? / Hello! How can I help you? / Привет! Как я могу помочь? / Merhaba! Size nasıl yardımcı olabilirim? / مرحبا! كيف يمكنني مساعدتك؟ / שלום! איך אני יכול לעזור?\n\n💡 Ask about activities, pricing, booking, safety for website info\n💬 Ask general questions for AI conversation\n\nPowered by Discount AI 🤖",
+      text: "Hello! How can I help you? / Привет! Как я могу помочь? / Merhaba! Size nasıl yardımcı olabilirim? / مرحبا! كيف يمكنني مساعدتك؟ / שלום! איך אני יכול לעזור?\n\n💡 Ask about activities, pricing, booking, safety for website info\n💬 Ask general questions for AI conversation\n\nPowered by Discount AI 🤖",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -144,9 +144,6 @@ const ClaudeChatBot = () => {
       'გაუქმება', 'cancel', 'отмена', 'iptal', 'إلغاء', 'ביטול',
       'cancellation', 'отмена', 'iptal', 'إلغاء', 'ביטול',
       
-      // Taxi
-      'ტაქსი', 'taxi', 'такси', 'taksi', 'تاكسي', 'מונית',
-      'ტრანსპორტი', 'transport', 'транспорт', 'ulaşım', 'نقل', 'תחבורה',
       
       // Contact
       'კონტაქტი', 'contact', 'контакт', 'iletişim', 'اتصال', 'קשר',
@@ -251,11 +248,6 @@ const ClaudeChatBot = () => {
       'გაუქმება', 'cancellation', 'отмена', 'iptal', 'إلغاء', 'ביטול'
     ];
     
-    // Keywords for taxi
-    const taxiKeywords = [
-      'ტაქსი', 'taxi', 'такси', 'taksi', 'تاكسي', 'מונית',
-      'ტრანსპორტი', 'transport', 'транспорт', 'ulaşım', 'نقل', 'תחבורה'
-    ];
     
     // Keywords for thanks
     const thanksKeywords = [
@@ -282,7 +274,6 @@ const ClaudeChatBot = () => {
     const hasBookingKeywords = bookingKeywords.some(keyword => input.includes(keyword));
     const hasSafetyKeywords = safetyKeywords.some(keyword => input.includes(keyword));
     const hasCancelKeywords = cancelKeywords.some(keyword => input.includes(keyword));
-    const hasTaxiKeywords = taxiKeywords.some(keyword => input.includes(keyword));
     const hasThanksKeywords = thanksKeywords.some(keyword => input.includes(keyword));
     const hasContactKeywords = contactKeywords.some(keyword => input.includes(keyword));
     const hasGreetingKeywords = greetingKeywords.some(keyword => input.includes(keyword));
@@ -390,7 +381,6 @@ const ClaudeChatBot = () => {
                  "Yacht: 250₾\n" +
                  "Quad: 80₾\n" +
                  "Jeep: 120₾\n\n" +
-                 "⚠️ Taxi price paid separately";
       }
     }
     
@@ -517,47 +507,6 @@ const ClaudeChatBot = () => {
       }
     }
     
-    if (hasTaxiKeywords) {
-      switch (detectedLanguage) {
-        case 'georgian':
-          return "🚗 ტაქსი\n\n" +
-                 "• ხელმისაწვდომია\n" +
-                 "• ფასი ცალკე იხდება\n" +
-                 "• 5-10 წუთში ჩამოვა\n" +
-                 "• ვერიფიცირებული მძღოლები";
-        case 'russian':
-          return "🚗 Такси\n\n" +
-                 "• Доступно\n" +
-                 "• Цена оплачивается отдельно\n" +
-                 "• Прибывает через 5-10 минут\n" +
-                 "• Проверенные водители";
-        case 'turkish':
-          return "🚗 Taksi\n\n" +
-                 "• Mevcut\n" +
-                 "• Fiyat ayrı ödenir\n" +
-                 "• 5-10 dakikada gelir\n" +
-                 "• Doğrulanmış sürücüler";
-        case 'arabic':
-          return "🚗 تاكسي\n\n" +
-                 "• متاح\n" +
-                 "• السعر يدفع منفصل\n" +
-                 "• يصل خلال 5-10 دقائق\n" +
-                 "• سائقون معتمدون";
-        case 'hebrew':
-          return "🚗 מונית\n\n" +
-                 "• זמין\n" +
-                 "• המחיר משולם בנפרד\n" +
-                 "• מגיע תוך 5-10 דקות\n" +
-                 "• נהגים מאומתים";
-        default: // English
-          return "🚗 Taxi\n\n" +
-                 "• Available\n" +
-                 "• Price paid separately\n" +
-                 "• Arrives in 5-10 minutes\n" +
-                 "• Verified drivers";
-      }
-    }
-    
     if (hasThanksKeywords) {
       switch (detectedLanguage) {
         case 'georgian':
@@ -680,6 +629,7 @@ const ClaudeChatBot = () => {
     <>
       {/* Chat Button */}
       <Box
+        data-fab-trigger="chat"
         sx={{
           position: 'fixed',
           bottom: 20,
@@ -691,7 +641,7 @@ const ClaudeChatBot = () => {
           <IconButton
             onClick={() => setIsOpen(true)}
             sx={{
-              backgroundColor: '#570015',
+              backgroundColor: '#87003A',
               color: 'white',
               width: 60,
               height: 60,
@@ -728,7 +678,7 @@ const ClaudeChatBot = () => {
           <Box
             sx={{
               p: 2,
-              backgroundColor: '#570015',
+              backgroundColor: '#87003A',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
@@ -745,7 +695,7 @@ const ClaudeChatBot = () => {
                   Discount AI
                 </Typography>
                 <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                  ონლაინ დახმარება
+                  Online Help
                 </Typography>
               </Box>
             </Box>
@@ -780,7 +730,7 @@ const ClaudeChatBot = () => {
                     maxWidth: '80%',
                     p: 2,
                     borderRadius: 2,
-                    backgroundColor: message.sender === 'user' ? '#570015' : 'white',
+                    backgroundColor: message.sender === 'user' ? '#87003A' : 'white',
                     color: message.sender === 'user' ? 'white' : 'text.primary',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                   }}
@@ -815,7 +765,7 @@ const ClaudeChatBot = () => {
                 >
                   <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
                     <Chip 
-                      label="წერს..." 
+                      label="Typing..." 
                       size="small" 
                       sx={{ 
                         backgroundColor: '#e0e0e0',
@@ -837,7 +787,7 @@ const ClaudeChatBot = () => {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
                 fullWidth
-                placeholder="შეიყვანეთ თქვენი შეკითხვა..."
+                placeholder="Enter your question..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -855,7 +805,7 @@ const ClaudeChatBot = () => {
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
                 sx={{
-                  backgroundColor: '#570015',
+                  backgroundColor: '#87003A',
                   color: 'white',
                   '&:hover': {
                     backgroundColor: '#3d000f'

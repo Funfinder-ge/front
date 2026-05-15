@@ -15,13 +15,9 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import {
-  LocalTaxi,
-} from "@mui/icons-material";
 import { QRCodeCanvas } from "qrcode.react";
 import { useAuth } from "../../contexts/AuthContext";
 import orderApiService from "../../services/orderApi";
-import TaxiOrder from "../../components/TaxiOrder";
 
 const Tickets = () => {
   const { user } = useAuth();
@@ -29,8 +25,6 @@ const Tickets = () => {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
   const [qrOrder, setQrOrder] = useState(null);
-  const [taxiOpen, setTaxiOpen] = useState(false);
-  const [taxiTo, setTaxiTo] = useState(null);
 
   // Load order feed and filter for current user
   useEffect(() => {
@@ -47,8 +41,11 @@ const Tickets = () => {
             : Array.isArray(feed?.data)
               ? feed.data
               : [];
-        // Filter only this user's orders
+        // Filter only this user's orders, exclude failed
+        const failedStatuses = ['failed', 'cancelled', 'canceled', 'rejected', 'expired'];
         const myOrders = list.filter((o) => {
+          const status = (o.status || o.payment_status || '').toLowerCase();
+          if (failedStatuses.includes(status)) return false;
           const emails = [o.customer_email, o.email, o.customer?.email, o.user?.email]
             .filter(Boolean)
             .map((e) => (typeof e === "string" ? e.toLowerCase() : e));
@@ -56,7 +53,7 @@ const Tickets = () => {
         });
         setOrders(myOrders);
       } catch (e) {
-        setOrdersError(e.message || "შეკვეთების ჩატვირთვა ვერ მოხერხდა");
+        setOrdersError(e.message || "Failed to load orders");
       } finally {
         setOrdersLoading(false);
       }
@@ -82,13 +79,13 @@ const Tickets = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "active":
-        return "აქტიური";
+        return "Active";
       case "pending":
-        return "მიმდინარე";
+        return "Pending";
       case "used":
-        return "გამოყენებული";
+        return "Used";
       case "cancelled":
-        return "გაუქმებული";
+        return "Cancelled";
       default:
         return status;
     }
@@ -103,7 +100,7 @@ const Tickets = () => {
 
     return {
       id: order.order_number || order.number || order.id,
-      activity: order.event_title || order.title || order.event?.title || "ივენთი",
+      activity: order.event_title || order.title || order.event?.title || "Event",
       description: order.event_description || order.description || order.event?.description || "",
       date: order.event_date || order.date || order.event?.date || "",
       time: order.event_time || order.time || order.event?.time || "",
@@ -138,25 +135,25 @@ const Tickets = () => {
             )}
             {(ticket.date || ticket.time) && (
               <Typography variant="body2" sx={{ mt: 1 }}>
-                თარიღი: <b>{ticket.date}</b> | დრო: <b>{ticket.time}</b>
+                Date: <b>{ticket.date}</b> | Time: <b>{ticket.time}</b>
               </Typography>
             )}
             {(ticket.latitude != null && ticket.longitude != null) && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                განედი: <b>{ticket.latitude}</b>, გრძედი: <b>{ticket.longitude}</b>
+                Latitude: <b>{ticket.latitude}</b>, Longitude: <b>{ticket.longitude}</b>
               </Typography>
             )}
             {(ticket.price !== "" || ticket.peopleCount != null) && (
               <Typography variant="body2" sx={{ mt: 0.5 }}>
                 {ticket.price !== "" && (
                   <>
-                    ფასი: <b>{ticket.price} ₾</b>
+                    Price: <b>{ticket.price} ₾</b>
                   </>
                 )}
                 {(ticket.price !== "" && ticket.peopleCount != null) && " • "}
                 {ticket.peopleCount != null && (
                   <>
-                    პირების რაოდენობა: <b>{ticket.peopleCount}</b>
+                    Number of People: <b>{ticket.peopleCount}</b>
                   </>
                 )}
               </Typography>
@@ -184,28 +181,12 @@ const Tickets = () => {
                   sx={{ borderRadius: 2 }}
                   onClick={() => setQrOrder(ticket._raw)}
                 >
-                  QR კოდი
+                  QR Code
                 </Button>
               ) : (
                 <Typography variant="caption" color="text.disabled">
-                  QR მიუწვდომელია
+                  QR Unavailable
                 </Typography>
-              )}
-              {(ticket.latitude != null && ticket.longitude != null) && (
-                <Button
-                  variant="outlined"
-                  startIcon={<LocalTaxi />}
-                  onClick={() => {
-                    setTaxiTo({
-                      lat: Number(ticket.latitude),
-                      lng: Number(ticket.longitude),
-                      address: `${ticket.activity} (${ticket.latitude}, ${ticket.longitude})`,
-                    });
-                    setTaxiOpen(true);
-                  }}
-                >
-                  ტაქსის შეკვეთა
-                </Button>
               )}
             </Box>
           </Grid>
@@ -224,9 +205,9 @@ const Tickets = () => {
             component="h1"
             gutterBottom
             fontWeight={700}
-            color="#570015"
+            color="#87003A"
           >
-            ჩემი ბილეთები
+            My Cards
           </Typography>
           <Alert severity="info" sx={{ mt: 4, maxWidth: 600, mx: "auto" }}>
             <Typography variant="h6" gutterBottom>
@@ -247,23 +228,23 @@ const Tickets = () => {
           component="h1"
           gutterBottom
           fontWeight={700}
-          color="#570015"
+          color="#87003A"
         >
-          ჩემი ბილეთები
+          My Cards
         </Typography>
         <Typography variant="h6" color="text.secondary" paragraph>
-          თქვენი ბილეთები და შეძენის ისტორია
+          
         </Typography>
       </Box>
 
       {/* Current Tickets */}
       <Box sx={{ mb: 5 }}>
         <Typography variant="h4" fontWeight={700} mb={3} color="primary">
-          ჩემი შეკვეთები
+          My Orders
         </Typography>
         <Divider sx={{ mb: 3 }} />
         {ordersLoading && (
-          <Typography color="text.secondary">იტვირთება...</Typography>
+          <Typography color="text.secondary">Loading...</Typography>
         )}
         {ordersError && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -271,7 +252,7 @@ const Tickets = () => {
           </Alert>
         )}
         {!ordersLoading && !ordersError && orders.length === 0 && (
-          <Typography color="text.secondary">შეკვეთები ვერ მოიძებნა</Typography>
+          <Typography color="text.secondary">No orders found</Typography>
         )}
         {!ordersLoading && !ordersError && orders.length > 0 && (
           <Box sx={{ mt: 2 }}>
@@ -292,7 +273,7 @@ const Tickets = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>ბილეთის QR კოდი</DialogTitle>
+        <DialogTitle>Ticket QR Code</DialogTitle>
         <DialogContent sx={{ display: "flex", justifyContent: "center", py: 3 }}>
           {qrOrder && (
             <QRCodeCanvas
@@ -320,29 +301,10 @@ const Tickets = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setQrOrder(null)}>დახურვა</Button>
+          <Button onClick={() => setQrOrder(null)}>Close</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Taxi Ordering Dialog */}
-      <Dialog
-        open={taxiOpen}
-        onClose={() => setTaxiOpen(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle>ტაქსის შეკვეთა</DialogTitle>
-        <DialogContent>
-          <TaxiOrder
-            initialTo={taxiTo}
-            onOrderComplete={() => setTaxiOpen(false)}
-            style={{ boxShadow: "none" }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTaxiOpen(false)}>დახურვა</Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };

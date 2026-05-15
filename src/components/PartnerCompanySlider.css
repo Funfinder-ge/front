@@ -1,15 +1,15 @@
 .partner-slider {
   width: 100%;
-  padding: 2rem 0;
+  padding: var(--space-2xl) 0;
 }
 
 .partner-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--bg-primary);
+  padding: var(--space-xl);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   text-align: center;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 250px;
   display: flex;
   flex-direction: column;
@@ -18,49 +18,63 @@
 }
 
 .partner-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
 .partner-logo {
   width: 100px;
   height: 100px;
   object-fit: contain;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
+  transition: transform 0.3s ease;
+}
+
+.partner-card:hover .partner-logo {
+  transform: scale(1.05);
 }
 
 .partner-name {
   font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #333;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
 }
 
 .partner-description {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-tertiary);
   margin: 0;
   text-align: center;
+  line-height: 1.5;
 }
 
 .swiper-button-next,
 .swiper-button-prev {
-  color: #570015 !important;
+  color: var(--color-primary) !important;
+  transition: transform 0.2s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
   .partner-card {
-    padding: 1.5rem;
+    padding: var(--space-lg);
+    height: 220px;
   }
-  
+
   .partner-logo {
     width: 80px;
     height: 80px;
   }
-  
+
   .partner-name {
     font-size: 1rem;
   }
-  
+
   .partner-description {
     font-size: 0.8rem;
   }

@@ -76,7 +76,7 @@ const QRScanner = ({ onScan }) => {
                 onClick={handleManualSubmit}
                 disabled={!qrData.trim()}
                 sx={{
-                  backgroundColor: '#570015',
+                  backgroundColor: '#87003A',
                   '&:hover': {
                     backgroundColor: '#3d000f',
                   },
@@ -91,7 +91,7 @@ const QRScanner = ({ onScan }) => {
               color="primary"
               onClick={startScanning}
               sx={{
-                backgroundColor: '#570015',
+                backgroundColor: '#87003A',
                 '&:hover': {
                   backgroundColor: '#3d000f',
                 },

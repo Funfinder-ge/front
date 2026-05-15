@@ -46,6 +46,10 @@ export const useCategories = () => {
   return useApi(categoryApi.getAll);
 };
 
+export const useCategoryList = () => {
+  return useApi(categoryApi.getList);
+};
+
 export const useCategory = (id) => {
   return useApi(() => categoryApi.getById(id), [id]);
 };
@@ -75,11 +79,42 @@ export const useEventFeed = () => {
 };
 
 export const useEventDetails = (id) => {
-  return useApi(() => eventsApi.getDetails(id), [id]);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!id) {
+      setData(null);
+      setError(null);
+      return;
+    }
+
+    const fetchDetails = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const result = await eventsApi.getDetails(id);
+        setData(result);
+      } catch (err) {
+        // Extract error message from error object
+        const errorMessage = err.message || err.detail || 'Failed to load event details';
+        setError(errorMessage);
+        console.error('Error loading event details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id]);
+
+  return { data, loading, error };
 };
 
 export const usePopularEvents = () => {
-  return useApi(eventsApi.getPopular);
+  return useApi(eventsApi.getAll);
 };
 
 export const useFeaturedEvents = () => {

@@ -40,12 +40,13 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
         image: payload.picture,
         googleId: payload.sub,
         verified: payload.email_verified,
-        loginMethod: 'google'
+        loginMethod: 'google',
+        credential: response.credential
       };
 
       onSuccess(userData);
     } catch (err) {
-      setError('შეცდომა Google ავტორიზაციის დროს');
+      setError('Error during Google authorization');
       onError && onError(err);
     } finally {
       setLoading(false);
@@ -55,7 +56,7 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
   // Initialize Google OAuth
   const initializeGoogleAuth = () => {
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
-      setError('Google Client ID არ არის კონფიგურირებული');
+      setError('Google Client ID is not configured');
       return;
     }
 
@@ -67,7 +68,7 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
         cancel_on_tap_outside: true
       });
     }).catch(err => {
-      setError('Google OAuth ვერ ჩაიტვირთა');
+      setError('Google OAuth failed to load');
       onError && onError(err);
     });
   };
@@ -108,7 +109,7 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
                     onSuccess(userData);
                   })
                   .catch(err => {
-                    setError('მომხმარებლის ინფორმაციის მიღება ვერ მოხერხდა');
+                    setError('Failed to get user information');
                     onError && onError(err);
                   })
                   .finally(() => setLoading(false));
@@ -120,7 +121,7 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
         }
       });
     } catch (err) {
-      setError('Google ავტორიზაცია ვერ დაიწყო');
+      setError('Google authorization failed to start');
       onError && onError(err);
       setLoading(false);
     }
@@ -162,10 +163,10 @@ const GoogleLogin = ({ onSuccess, onError, disabled = false }) => {
         }}
       >
         {loading ? (
-          <Typography variant="body2">იტვირთება...</Typography>
+          <Typography variant="body2">Loading...</Typography>
         ) : (
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            Google-ით შესვლა
+            Login Using Google
           </Typography>
         )}
       </Button>

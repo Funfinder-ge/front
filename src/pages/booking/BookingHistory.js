@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import orderApiService from '../../services/orderApi';
+import FunLoader from '../../components/FunLoader';
 
 const BookingHistory = () => {
   const navigate = useNavigate();
@@ -145,13 +146,17 @@ const BookingHistory = () => {
   };
 
   // Filter orders
+  const failedStatuses = ['failed', 'cancelled', 'canceled', 'rejected', 'expired'];
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = !searchTerm || 
+    const status = (order.status || order.payment_status || '').toLowerCase();
+    if (failedStatuses.includes(status)) return false;
+
+    const matchesSearch = !searchTerm ||
       order.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.event?.toString().includes(searchTerm);
-    
+
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -234,7 +239,7 @@ const BookingHistory = () => {
                   onClick={() => loadOrderDetails(order.id)}
                   fullWidth
                 >
-                  დეტალები
+                  More
                 </Button>
                 {order.status === 'paid' && (
                   <Button
@@ -483,16 +488,13 @@ const BookingHistory = () => {
 
       {/* Orders List */}
       {loading ? (
-        <Box display="flex" justifyContent="center" py={4}>
-          <CircularProgress />
-        </Box>
+        <FunLoader />
       ) : filteredOrders.length === 0 ? (
         <Card>
           <CardContent>
             <Box textAlign="center" py={4}>
               <Typography variant="h6" color="text.secondary" mb={2}>
-                შეკვეთები არ მოიძებნა
-              </Typography>
+O              </Typography>
               <Typography variant="body2" color="text.secondary">
                 თქვენ არ გაქვთ შეკვეთები ან ფილტრები ძალიან შეზღუდულია
               </Typography>

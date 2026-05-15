@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Card, CardContent, Typography, Box, InputAdornment, IconButton, Divider } from '@mui/material';
+import { TextField, Button, Card, CardContent, Typography, Box, InputAdornment, IconButton, Divider, Autocomplete } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
@@ -8,13 +8,34 @@ import PublicIcon from '@mui/icons-material/Public';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import GoogleLogin from '../../components/GoogleLogin';
+import LoginHelper from '../../components/LoginHelper';
 import apiService from '../../services/api';
+
+const COUNTRIES = [
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+  'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+  'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
+  'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+  'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+  'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+  'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+  'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos',
+  'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
+  'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova',
+  'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+  'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau',
+  'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania',
+  'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal',
+  'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Korea',
+  'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan',
+  'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu',
+  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela',
+  'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+];
 
 const Register = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle } = useAuth();
   const [form, setForm] = useState({ 
     firstname: '', 
     lastname: '', 
@@ -41,12 +62,12 @@ const Register = () => {
 
     // Validation
     if (!form.firstname || !form.lastname || !form.email || !form.password || !form.confirm || !form.country || !form.mobile) {
-      setError('ყველა ველი სავალდებულოა');
+      setError('All Inputs Are Important');
       setLoading(false);
       return;
     }
     if (form.password !== form.confirm) {
-      setError('პაროლები არ ემთხვევა');
+      setError('Password Not Match');
       setLoading(false);
       return;
     }
@@ -65,25 +86,15 @@ const Register = () => {
       console.log('Registration data:', registrationData);
       const response = await apiService.post('/auth/register', registrationData);
       console.log('Registration response:', response);
-      alert("თქვენ წარმატებით დარეგისტრირდით");
+      alert("Register Successfully");
       navigate('/login');
     } catch (err) {
       console.error('Registration error:', err);
-      alert("დაფიქსირდა შეცდომა");
-      setError('რეგისტრაცია ვერ მოხერხდა. სცადეთ თავიდან.');
+      alert("Error");
+      setError('Can not Register');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSuccess = (userData) => {
-    loginWithGoogle(userData);
-    navigate('/profile');
-  };
-
-  const handleGoogleError = (error) => {
-    setError('Google რეგისტრაცია ვერ მოხერხდა');
-    console.error('Google registration error:', error);
   };
 
   return (
@@ -91,13 +102,13 @@ const Register = () => {
       <Card sx={{ maxWidth: 400, width: '100%', boxShadow: 3, borderRadius: 3 }}>
         <CardContent>
           <Typography variant="h5" align="center" fontWeight={700} mb={2}>
-            რეგისტრაცია
+            Register
           </Typography>
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
               margin="normal"
-              label="სახელი"
+              label="Name"
               name="firstname"
               value={form.firstname}
               onChange={handleChange}
@@ -106,7 +117,7 @@ const Register = () => {
             <TextField
               fullWidth
               margin="normal"
-              label="გვარი"
+              label="Surname"
               name="lastname"
               value={form.lastname}
               onChange={handleChange}
@@ -115,26 +126,43 @@ const Register = () => {
             <TextField
               fullWidth
               margin="normal"
-              label="მობილური"
+              label="Phone"
               name="mobile"
               type="tel"
               value={form.mobile}
               onChange={handleChange}
               InputProps={{ startAdornment: <InputAdornment position="start"><PhoneIcon /></InputAdornment> }}
             />
-            <TextField
-              fullWidth
-              margin="normal"
-              label="ქვეყანა"
-              name="country"
-              value={form.country}
-              onChange={handleChange}
-              InputProps={{ startAdornment: <InputAdornment position="start"><PublicIcon /></InputAdornment> }}
+            <Autocomplete
+              options={COUNTRIES}
+              value={form.country || null}
+              onChange={(_, newValue) => {
+                setForm((prev) => ({ ...prev, country: newValue || '' }));
+                setError('');
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  margin="normal"
+                  label="Country"
+                  name="country"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start"><PublicIcon /></InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
             />
             <TextField
               fullWidth
               margin="normal"
-              label="ელ.ფოსტა"
+              label="Email"
               name="email"
               type="email"
               value={form.email}
@@ -144,7 +172,7 @@ const Register = () => {
             <TextField
               fullWidth
               margin="normal"
-              label="პაროლი"
+              label="Password"
               name="password"
               type={showPassword ? 'text' : 'password'}
               value={form.password}
@@ -163,7 +191,7 @@ const Register = () => {
             <TextField
               fullWidth
               margin="normal"
-              label="დაადასტურე პაროლი"
+              label="Confirm Password"
               name="confirm"
               type={showConfirm ? 'text' : 'password'}
               value={form.confirm}
@@ -188,7 +216,7 @@ const Register = () => {
               disabled={loading}
               sx={{ mt: 2, py: 1.2, fontWeight: 700, fontSize: 16 }}
             >
-              {loading ? 'რეგისტრაცია...' : 'რეგისტრაცია'}
+              {loading ? 'Register...' : 'Register'}
             </Button>
           </form>
 
@@ -196,16 +224,13 @@ const Register = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', my: 3 }}>
             <Divider sx={{ flexGrow: 1 }} />
             <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
-              ან
+              Or
             </Typography>
             <Divider sx={{ flexGrow: 1 }} />
           </Box>
 
           {/* Google Registration */}
-          <GoogleLogin 
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
+          <LoginHelper />
         </CardContent>
       </Card>
     </Box>

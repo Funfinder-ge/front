@@ -20,6 +20,7 @@ import {
   CenterFocusStrong
 } from '@mui/icons-material';
 import { getYandexMapsApiUrl, isApiKeyConfigured } from '../config/yandexMaps';
+import FunLoader from './FunLoader';
 
 /**
  * Yandex Static Map Component
@@ -378,7 +379,7 @@ const YandexStaticMap = ({
                 </Box>
               </>
             ) : (
-              <CircularProgress />
+              <FunLoader />
             )}
           </Box>
         )}

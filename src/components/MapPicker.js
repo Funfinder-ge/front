@@ -114,7 +114,7 @@ const MapPicker = ({
           variant="contained" 
           onClick={handleConfirm}
           disabled={!selectedLocation}
-          sx={{ bgcolor: '#570015', '&:hover': { bgcolor: '#3d000f' } }}
+          sx={{ bgcolor: '#87003A', '&:hover': { bgcolor: '#3d000f' } }}
         >
           არჩევა
         </Button>

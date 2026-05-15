@@ -7,8 +7,10 @@ import {
   Phone, Email, LocationOn, AccessTime, 
   DirectionsBoat, SportsMotorsports 
 } from '@mui/icons-material';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Contact = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,43 +28,43 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('თქვენი შეტყობინება გაიგზავნა!');
+    alert('Your message has been sent!');
     setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
   };
 
   const contactInfo = [
     {
-      icon: <Phone sx={{ color: '#570015' }} />,
-      title: 'ტელეფონი',
-      details: ['+995 555 123 456', '+995 555 789 012']
+      icon: <Phone sx={{ color: '#87003A' }} />,
+      title: 'Phone',
+      details: ['+995 593 76 27 27', '+995 571 92 50 05']
     },
     {
-      icon: <Email sx={{ color: '#570015' }} />,
-      title: 'ელ.ფოსტა',
-      details: ['info@discount.ge', 'booking@discount.ge']
+      icon: <Email sx={{ color: '#87003A' }} />,
+      title: 'Email',
+      details: ['info@funfinder.ge']
     },
     {
-      icon: <LocationOn sx={{ color: '#570015' }} />,
-      title: 'მისამართი',
-      details: ['ბათუმი, ზღვის პირა', 'ბულვარი 1']
+      icon: <LocationOn sx={{ color: '#87003A' }} />,
+      title: 'Address',
+      details: ['Batumi, Adjara', '']
     },
     {
-      icon: <AccessTime sx={{ color: '#570015' }} />,
-      title: 'სამუშაო საათები',
-      details: ['ორშაბათი - პარასკევი: 09:00-18:00', 'შაბათი - კვირა: 10:00-16:00']
+      icon: <AccessTime sx={{ color: '#87003A' }} />,
+      title: 'Working Hours',
+      details: ['Monday - Friday: 09:00-18:00', 'Saturday - Sunday: 10:00-16:00']
     }
   ];
 
   const services = [
     {
-      icon: <DirectionsBoat sx={{ color: '#570015' }} />,
-      title: 'საზღვაო აქტივობები',
-      description: 'იახტით გასეირნება, ჯეტ სკიი, ზღვის პარაშუტი'
+      icon: <DirectionsBoat sx={{ color: '#87003A' }} />,
+      title: 'Sea Activities',
+      description: 'Yacht tours, jet ski, sea parachute'
     },
     {
-      icon: <SportsMotorsports sx={{ color: '#570015' }} />,
-      title: 'სახმელეთო აქტივობები',
-      description: 'კვადრო ტურები, ჯიპ ტურები, ზიპ ლაინები'
+      icon: <SportsMotorsports sx={{ color: '#87003A' }} />,
+      title: 'Land Activities',
+      description: 'Quad tours, jeep tours, zip lines'
     }
   ];
 
@@ -70,27 +72,61 @@ const Contact = () => {
     <Container maxWidth="lg">
       {/* Header */}
       <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h3" component="h1" gutterBottom fontWeight={700} color="#570015">
-          კონტაქტი
+        <Typography variant="h3" component="h1" gutterBottom fontWeight={700} color="#87003A">
+          Contact
         </Typography>
         <Typography variant="h6" color="text.secondary" paragraph>
-          დაუკავშირდით ჩვენს გუნდს ნებისმიერი კითხვისთვის
+          Contact our team for any questions
         </Typography>
       </Box>
+
+      {/* About Us Section */}
+      <Paper sx={{ p: 4, mb: 6, bgcolor: '#f8f9fa' }}>
+        <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight={700} color="#87003A" sx={{ mb: 3 }}>
+          {t("home.about.title")}
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic' }}>
+              {t("home.about.quote")}
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic' }}>
+              {t("home.about.p1")}
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic' }}>
+              {t("home.about.p2")}
+            </Typography>
+            <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(135, 0, 58, 0.05)', borderRadius: 2 }}>
+              <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, fontWeight: 600, color: 'text.secondary', fontStyle: 'italic' }}>
+                {t("home.about.missionTitle")}
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', fontStyle: 'italic' }}>
+                {t("home.about.missionText")}
+              </Typography>
+            </Box>
+            <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, mt: 2, color: 'text.secondary', fontStyle: 'italic' }}>
+              {t("home.about.p3")}
+            </Typography>
+            <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, fontWeight: 600, color: '#87003A', fontStyle: 'italic' }}>
+              {t("home.about.final")}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
 
       <Grid container spacing={4}>
         {/* Contact Form */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom fontWeight={700} color="#570015">
-                გაგვიგზავნეთ შეტყობინება
+              <Typography variant="h5" component="h2" gutterBottom fontWeight={700} color="#87003A">
+                Send Us a Message
               </Typography>
               <form onSubmit={handleSubmit}>
                 <TextField
                   fullWidth
                   margin="normal"
-                  label="სახელი"
+                  label="Name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -99,7 +135,7 @@ const Contact = () => {
                 <TextField
                   fullWidth
                   margin="normal"
-                  label="ელ.ფოსტა"
+                  label="Email"
                   name="email"
                   type="email"
                   value={formData.email}
@@ -109,7 +145,7 @@ const Contact = () => {
                 <TextField
                   fullWidth
                   margin="normal"
-                  label="ტელეფონი"
+                  label="Phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
@@ -117,7 +153,7 @@ const Contact = () => {
                 <TextField
                   fullWidth
                   margin="normal"
-                  label="თემა"
+                  label="Subject"
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
@@ -126,7 +162,7 @@ const Contact = () => {
                 <TextField
                   fullWidth
                   margin="normal"
-                  label="შეტყობინება"
+                  label="Message"
                   name="message"
                   multiline
                   rows={4}
@@ -141,12 +177,12 @@ const Contact = () => {
                   fullWidth
                   sx={{ 
                     mt: 3, 
-                    bgcolor: '#570015', 
+                    bgcolor: '#87003A', 
                     fontWeight: 700,
                     '&:hover': { bgcolor: '#3d000f' }
                   }}
                 >
-                  გაგზავნა
+                  Send
                 </Button>
               </form>
             </CardContent>
@@ -157,8 +193,8 @@ const Contact = () => {
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom fontWeight={700} color="#570015">
-                კონტაქტის ინფორმაცია
+              <Typography variant="h5" component="h2" gutterBottom fontWeight={700} color="#87003A">
+                Contact Information
               </Typography>
               <List>
                 {contactInfo.map((info, index) => (
@@ -188,8 +224,8 @@ const Contact = () => {
 
       {/* Services */}
       <Box sx={{ mt: 6 }}>
-        <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight={700} color="#570015">
-          ჩვენი სერვისები
+        <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight={700} color="#87003A">
+          Our Services
         </Typography>
         <Grid container spacing={4} sx={{ mt: 2 }}>
           {services.map((service, index) => (
@@ -212,11 +248,11 @@ const Contact = () => {
 
       {/* Map Placeholder */}
       <Paper sx={{ p: 4, mt: 6, textAlign: 'center', bgcolor: '#f8f9fa' }}>
-        <Typography variant="h5" component="h3" gutterBottom fontWeight={700} color="#570015">
-          ჩვენი მისამართი
+        <Typography variant="h5" component="h3" gutterBottom fontWeight={700} color="#87003A">
+          Our Address
         </Typography>
         <Typography variant="body1" paragraph>
-          ბათუმი, ზღვის პირა, ბულვარი 1
+          Batumi, Seaside, Boulevard 1
         </Typography>
         <Box sx={{ 
           width: '100%', 
@@ -228,7 +264,7 @@ const Contact = () => {
           borderRadius: 2
         }}>
           <Typography variant="body2" color="text.secondary">
-            რუკა აქ იქნება ჩართული
+            Map will be embedded here
           </Typography>
         </Box>
       </Paper>

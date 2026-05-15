@@ -19,6 +19,7 @@ import {
   CenterFocusStrong
 } from '@mui/icons-material';
 import { getYandexMapsApiUrl, isApiKeyConfigured } from '../config/yandexMaps';
+import FunLoader from './FunLoader';
 
 /**
  * Yandex Map Component
@@ -233,7 +234,7 @@ const YandexMap = ({
             onClick={handleSearch}
             disabled={loading || !searchQuery.trim()}
             startIcon={loading ? <CircularProgress size={16} /> : <Search />}
-            sx={{ bgcolor: '#570015', '&:hover': { bgcolor: '#3d000f' } }}
+            sx={{ bgcolor: '#87003A', '&:hover': { bgcolor: '#3d000f' } }}
           >
             ძებნა
           </Button>
@@ -292,7 +293,7 @@ const YandexMap = ({
             position: 'absolute',
             bottom: 16,
             left: 16,
-            bgcolor: '#570015',
+            bgcolor: '#87003A',
             '&:hover': { bgcolor: '#3d000f' }
           }}
           onClick={handleCurrentLocation}
@@ -315,7 +316,7 @@ const YandexMap = ({
                 p: 2, 
                 mb: 1, 
                 cursor: 'pointer',
-                border: selectedLocation?.lat === result.lat ? '2px solid #570015' : '1px solid #e0e0e0',
+                border: selectedLocation?.lat === result.lat ? '2px solid #87003A' : '1px solid #e0e0e0',
                 borderRadius: 1,
                 '&:hover': { bgcolor: '#f5f5f5' }
               }}
@@ -342,7 +343,7 @@ const YandexMap = ({
         <Box sx={{ 
           mt: 2, 
           p: 2, 
-          border: '2px solid #570015', 
+          border: '2px solid #87003A', 
           borderRadius: 1,
           bgcolor: 'white'
         }}>
@@ -374,18 +375,10 @@ const YandexMap = ({
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           bgcolor: 'rgba(255,255,255,0.9)',
           zIndex: 1000
         }}>
-          <Box textAlign="center">
-            <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Yandex Maps ჩატვირთვა...
-            </Typography>
-          </Box>
+          <FunLoader label="Yandex Maps ჩატვირთვა" />
         </Box>
       )}
 

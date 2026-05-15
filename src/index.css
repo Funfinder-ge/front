@@ -1,9 +1,66 @@
 @font-face {
   font-family: nino-herv;
-  src: url(./assets/fonts/bpg_nino_mtavruli_normal.otf);
+  src: url(./assets/fonts/Inter-VariableFont_opsz\,wght.ttf);
 }
+
+/* ===== DESIGN TOKENS (CSS Custom Properties) ===== */
+:root {
+  /* Brand Colors */
+  --color-primary: #87003A;
+  --color-primary-dark: #3d000f;
+  --color-primary-semi: rgba(135, 0, 58, 0.52);
+  --color-primary-light: rgba(135, 0, 58, 0.08);
+
+  /* Text */
+  --text-primary: #222;
+  --text-secondary: #555;
+  --text-tertiary: #666;
+  --text-muted: #999;
+  --text-inverse: #ffffff;
+
+  /* Backgrounds */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f5f5f5;
+
+  /* Borders */
+  --border-light: #eee;
+  --border-default: #ddd;
+  --border-medium: #ccc;
+
+  /* Status */
+  --color-success: #4caf50;
+  --color-error: #f44336;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+  --color-favorite: #e91e63;
+
+  /* Shadows */
+  --shadow-subtle: rgba(0,0,0,0.06) 0px 2px 4px;
+  --shadow-card: rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.08) 0px 4px 8px;
+  --shadow-hover: rgba(0,0,0,0.04) 0px 0px 0px 1px, rgba(0,0,0,0.06) 0px 4px 12px, rgba(0,0,0,0.12) 0px 8px 16px;
+  --shadow-elevated: rgba(0,0,0,0.08) 0px 8px 24px, rgba(0,0,0,0.04) 0px 2px 8px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 50%;
+  --radius-pill: 9999px;
+}
+
 /* MUI's CssBaseline and theme handle most resets and base styles. */
-/* Remove or comment out conflicting global styles below. */
 
 @media (min-width: 768px) {
   .container {
@@ -29,3 +86,125 @@
   margin-right: auto;
   margin-left: auto;
 }
+
+* {
+  font-family: nino-herv, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica Neue, Arial, sans-serif;
+}
+
+/* ===== ACCESSIBILITY: Dark Theme ===== */
+body.dark-theme,
+.dark-theme {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-default: rgba(255, 255, 255, 0.23);
+  --border-light: rgba(255, 255, 255, 0.12);
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .main-content {
+  background-color: #121212 !important;
+}
+
+.dark-theme .MuiPaper-root,
+.dark-theme .MuiCard-root {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .MuiTypography-root {
+  color: #ffffff !important;
+}
+
+.dark-theme .MuiButton-text {
+  color: #ffffff !important;
+}
+
+.dark-theme .MuiTextField-root .MuiOutlinedInput-root {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .MuiTextField-root .MuiOutlinedInput-root fieldset {
+  border-color: rgba(255, 255, 255, 0.23) !important;
+}
+
+/* ===== ACCESSIBILITY: Dyslexia Mode ===== */
+.dyslexia-mode * {
+  font-family: 'Comic Sans MS', Arial, sans-serif !important;
+  letter-spacing: 0.1em !important;
+  word-spacing: 0.2em !important;
+  line-height: 1.8 !important;
+}
+
+/* ===== ACCESSIBILITY: High Contrast ===== */
+.high-contrast {
+  filter: contrast(1.5) brightness(1.1);
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+}
+
+
+/* ===== Apple Pay Button ===== */
+:root {
+  --apple-pay-button-width: 100%;
+  --apple-pay-button-height: 56px;
+  --apple-pay-button-border-radius: 8px;
+  --apple-pay-button-padding: 0px;
+  --apple-pay-button-type: buy;
+}
+
+@supports (-webkit-appearance: -apple-pay-button) {
+  .apple-pay-button {
+    display: inline-block;
+    -webkit-appearance: -apple-pay-button;
+    -apple-pay-button-type: var(--apple-pay-button-type);
+    width: var(--apple-pay-button-width);
+    height: var(--apple-pay-button-height);
+    border-radius: var(--apple-pay-button-border-radius);
+    padding: var(--apple-pay-button-padding);
+    cursor: pointer;
+  }
+
+  .apple-pay-button-black { -apple-pay-button-style: black; }
+  .apple-pay-button-white { -apple-pay-button-style: white; }
+  .apple-pay-button-white-with-line { -apple-pay-button-style: white-outline; }
+}
+
+@supports not (-webkit-appearance: -apple-pay-button) {
+  .apple-pay-button {
+    display: inline-block;
+    background-size: 100% 60%;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    border-radius: var(--apple-pay-button-border-radius);
+    padding: var(--apple-pay-button-padding);
+    box-sizing: border-box;
+    min-width: 200px;
+    width: var(--apple-pay-button-width);
+    height: var(--apple-pay-button-height);
+    cursor: pointer;
+  }
+
+  .apple-pay-button-black {
+    background-image: -webkit-named-image(apple-pay-logo-white);
+    background-color: black;
+  }
+
+  .apple-pay-button-white {
+    background-image: -webkit-named-image(apple-pay-logo-black);
+    background-color: white;
+  }
+
+  .apple-pay-button-white-with-line {
+    background-image: -webkit-named-image(apple-pay-logo-black);
+    background-color: white;
+    border: 0.5px solid black;
+  }
+}
+

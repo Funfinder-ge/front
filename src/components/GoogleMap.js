@@ -23,6 +23,7 @@ import {
   CheckCircle
 } from '@mui/icons-material';
 import { getGoogleMapsApiUrl, isApiKeyConfigured } from '../config/googleMaps';
+import FunLoader from './FunLoader';
 
 /**
  * Google Map Component
@@ -375,7 +376,7 @@ const GoogleMap = ({
             onClick={handleSearch}
             disabled={loading || !searchQuery.trim()}
             startIcon={loading ? <CircularProgress size={16} /> : <Search />}
-            sx={{ bgcolor: '#570015', '&:hover': { bgcolor: '#3d000f' } }}
+            sx={{ bgcolor: '#87003A', '&:hover': { bgcolor: '#3d000f' } }}
           >
             ძებნა
           </Button>
@@ -434,7 +435,7 @@ const GoogleMap = ({
             position: 'absolute',
             bottom: 16,
             left: 16,
-            bgcolor: '#570015',
+            bgcolor: '#87003A',
             '&:hover': { bgcolor: '#3d000f' }
           }}
           onClick={handleCurrentLocation}
@@ -493,7 +494,7 @@ const GoogleMap = ({
                 p: 2, 
                 mb: 1, 
                 cursor: 'pointer',
-                border: selectedLocation?.lat === result.lat ? '2px solid #570015' : '1px solid #e0e0e0',
+                border: selectedLocation?.lat === result.lat ? '2px solid #87003A' : '1px solid #e0e0e0',
                 '&:hover': { bgcolor: '#f5f5f5' }
               }}
               onClick={() => handleSearchResultSelect(result)}
@@ -529,18 +530,10 @@ const GoogleMap = ({
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           bgcolor: 'rgba(255,255,255,0.9)',
           zIndex: 1000
         }}>
-          <Box textAlign="center">
-            <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              Google Maps ჩატვირთვა...
-            </Typography>
-          </Box>
+          <FunLoader label="Google Maps ჩატვირთვა" />
         </Box>
       )}
     </Box>

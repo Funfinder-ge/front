@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://base.funfinder.ge/api/v3';
+const API_BASE_URL = 'https://base.funfinder.ge/en/api/v3';
 
 // API configuration
 const apiConfig = {
@@ -32,6 +32,25 @@ class ApiService {
       if (!response.ok) {
         console.error(`❌ API Error: ${response.status} ${response.statusText} for ${url}`);
         
+        // Try to parse error response body
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.detail) {
+            errorMessage = errorData.detail;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // If error response is not JSON, use status text
+          const text = await response.text().catch(() => '');
+          if (text) {
+            errorMessage = text;
+          }
+        }
+        
         // Handle specific error cases
         if (response.status === 404) {
           console.warn(`⚠️ Endpoint not found: ${url}`);
@@ -39,7 +58,11 @@ class ApiService {
           return [];
         }
         
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Create error with detailed message
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.response = response;
+        throw error;
       }
       
       const data = await response.json();
@@ -124,6 +147,7 @@ export const cityApi = {
 
 export const categoryApi = {
   getAll: () => apiService.get('/category/all/'),
+  getList: () => apiService.get('/category/list'),
   getById: (id) => apiService.get(`/category/${id}/`),
   create: (data) => apiService.post('/category/', data),
   update: (id, data) => apiService.put(`/category/${id}/`, data),
@@ -188,7 +212,66 @@ export const eventsApi = {
       return [];
     }
   },
-  getDetails: (id) => apiService.get(`/event/details/${id}`),
+  getDetails: async (id) => {
+    try {
+      console.log(`Fetching event details for ID: ${id}...`);
+      
+      // Try v3 event details endpoint first (returns full images[] array)
+      try {
+        const url = `https://base.funfinder.ge/en/api/v3/event/details/${id}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Found event via v3 details endpoint:', data);
+          return data;
+        } else if (response.status === 404) {
+          console.warn('Event not found in v3 endpoint');
+        } else {
+          console.warn(`v3 endpoint returned ${response.status}, trying fallback...`);
+        }
+      } catch (v3Error) {
+        console.warn('v3 endpoint failed:', v3Error);
+      }
+      
+      // Fallback: Try to get from public feed
+      console.log('Trying public feed as fallback...');
+      const feedEvents = await eventsApi.getFeed();
+      const event = feedEvents.find(e => {
+        const eventId = e.id || e.event_id;
+        return eventId === parseInt(id) || eventId === id || String(eventId) === String(id);
+      });
+      
+      if (event) {
+        console.log('✅ Found event in public feed:', event);
+        return event;
+      }
+      
+      // If not found in feed, try v3 event endpoint
+      try {
+        const eventData = await apiService.get(`/event/${id}`);
+        if (eventData) {
+          console.log('✅ Found event via v3 /event/{id} endpoint:', eventData);
+          return eventData;
+        }
+      } catch (eventError) {
+        console.warn('v3 event endpoint failed:', eventError);
+      }
+      
+      // If all else fails, throw error
+      throw new Error(`Event with ID ${id} not found`);
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      throw error;
+    }
+  },
   create: (data) => apiService.post('/events/', data),
   update: (id, data) => apiService.put(`/events/${id}/`, data),
   delete: (id) => apiService.delete(`/events/${id}/`),

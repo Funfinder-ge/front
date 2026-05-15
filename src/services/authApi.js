@@ -5,6 +5,7 @@
 class AuthApiService {
   constructor() {
     this.baseURL = 'https://base.funfinder.ge/en/api/v3';
+    this.sessionToken = null;
   }
 
   /**
@@ -14,46 +15,59 @@ class AuthApiService {
    * @returns {Promise<Object>} Response data
    */
   async makeRequest(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const defaultOptions = {
-      method: 'GET', // Explicitly set default method
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      credentials: 'include', // Include cookies for session-based auth
-      timeout: 30000,
-    };
+  const url = `${this.baseURL}${endpoint}`;
+  
+  const defaultOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    credentials: 'include',
+  };
 
-    const requestOptions = {
-      ...defaultOptions,
-      ...options,
-      headers: {
-        ...defaultOptions.headers,
-        ...options.headers,
-      },
-    };
+  const requestOptions = {
+    ...defaultOptions,
+    ...options,
+    headers: {
+      ...defaultOptions.headers,
+      ...options.headers,
+    },
+  };
 
-    console.log(`Auth API Request: ${requestOptions.method} ${url}`);
+  console.log(`Auth API Request: ${requestOptions.method} ${url}`);
 
+  try {
+    const response = await fetch(url, requestOptions);
+
+    let data = null;
     try {
-      const response = await fetch(url, requestOptions);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Auth API Error Response:', errorData);
-        throw new Error(errorData.message || `HTTP ${response.status} Error`);
-      }
-
-      const data = await response.json();
-      console.log(`Auth API Response: ${response.status} ${url}`);
-      return data;
-    } catch (error) {
-      console.error('Auth API Request Error:', error);
-      throw error;
+      data = await response.json();
+    } catch {
+      data = null;
     }
+
+    if (!response.ok) {
+      console.error('FULL ERROR:', {
+        status: response.status,
+        response: data,
+      });
+
+      throw new Error(
+        data?.details ||
+        data?.message ||
+        `HTTP ${response.status}`
+      );
+    }
+
+    console.log(`Auth API Response: ${response.status} ${url}`);
+    return data;
+
+  } catch (error) {
+    console.error('Auth API Request Error:', error);
+    throw error;
   }
+}
 
   /**
    * Login customer
@@ -65,13 +79,33 @@ class AuthApiService {
   async login(credentials) {
     try {
       console.log('Attempting customer login:', credentials);
-      const response = await this.makeRequest('/auth/login', {
+      const url = `${this.baseURL}/auth/login`;
+      const response = await fetch(url, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
-      
-      console.log('Login successful:', response);
-      return response;
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.detail || `HTTP ${response.status} Error`);
+      }
+
+      const data = await response.json();
+
+      // Extract session token from response body or set-cookie header
+      const token = data.customer_session_token || data.token;
+      if (token) {
+        this.sessionToken = token;
+        document.cookie = `customer_session_token=${token}; path=/`;
+      }
+
+      console.log('Login successful:', data);
+      return data;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -123,6 +157,40 @@ class AuthApiService {
   }
 
   /**
+   * Update logged-in customer's profile
+   * @param {Object} data - Fields to update (firstname, lastname, email, mobile, country, image, ...)
+   * @returns {Promise<Object>} Updated profile
+   */
+  async updateProfile(data) {
+    try {
+      console.log('Updating customer profile:', data);
+      const url = 'https://base.funfinder.ge/en/api/v3/auth/profile/update';
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      let body = null;
+      try { body = await response.json(); } catch { body = null; }
+
+      if (!response.ok) {
+        throw new Error(body?.details || body?.message || `HTTP ${response.status}`);
+      }
+
+      console.log('Profile updated:', body);
+      return body;
+    } catch (error) {
+      console.error('Profile update error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Logout customer
    * @returns {Promise<Object>} Logout response
    */
@@ -140,6 +208,38 @@ class AuthApiService {
       throw error;
     }
   }
+
+  /**
+   * Login with Google
+   * @param {Object} googleData - Google user data
+   * @returns {Promise<Object>} Login response
+   */
+async loginWithGoogle(googleResponse) {
+  try {
+    // Extract Google ID token (JWT)
+    const token = googleResponse?.credential;
+
+    if (!token) {
+      throw new Error('Missing Google ID token (credential)');
+    }
+
+    console.log('Google ID Token:', token.substring(0, 50) + '...');
+
+    const response = await this.makeRequest('/auth/google/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        token: token
+      }),
+    });
+
+    console.log('Google login successful:', response);
+    return response;
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    throw error;
+  }
+}
 
   /**
    * Check if customer is authenticated

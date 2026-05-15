@@ -20,12 +20,10 @@ import {
   MenuItem
 } from '@mui/material';
 import {
-  LocationOn,
-  Directions,
-  Schedule,
-  Star
+  LocationOn
 } from '@mui/icons-material';
 import { useLocation } from '../hooks/useLocation';
+import FunLoader from './FunLoader';
 
 /**
  * Nearby Activities Component
@@ -103,11 +101,6 @@ const NearbyActivities = ({
     return `${distance.toFixed(1)}km`;
   };
 
-  const getActivityIcon = (category) => {
-    // You can customize icons based on activity category
-    return <LocationOn />;
-  };
-
   if (error) {
     return (
       <Alert severity="error" sx={{ mb: 2, ...style }}>
@@ -182,9 +175,7 @@ const NearbyActivities = ({
 
             {/* Results */}
             {isLoading ? (
-              <Box display="flex" justifyContent="center" py={3}>
-                <CircularProgress />
-              </Box>
+              <FunLoader />
             ) : nearbyActivities.length > 0 ? (
               <List>
                 {nearbyActivities.map((activity, index) => (
@@ -195,7 +186,7 @@ const NearbyActivities = ({
                       sx={{ borderRadius: 1, mb: 1 }}
                     >
                       <ListItemIcon>
-                        {getActivityIcon(activity.category)}
+                        <img src={activity.image} alt={activity.name} style={{width:"150px", marginRight:"20px"}} />
                       </ListItemIcon>
                       <ListItemText
                         primary={
@@ -213,7 +204,7 @@ const NearbyActivities = ({
                                 label={formatDistance(calculateDistance(activity.latitude, activity.longitude))}
                                 size="small"
                                 sx={{
-                                  backgroundColor: '#570015',
+                                  backgroundColor: '#87003A',
                                   color: 'white',
                                   fontWeight: 500,
                                   '& .MuiChip-label': {

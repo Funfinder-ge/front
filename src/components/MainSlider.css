@@ -1,77 +1,228 @@
+/* ===== MOBILE (DEFAULT) ===== */
+
+.main-slider-wrapper {
+  --parallax-y: 0px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
 .main-slider {
   width: 100%;
-  height: 600px;
-  margin: 0 auto;
-  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .slide-content {
-  width: 100%;
-  height: 100%;
   position: relative;
+  width: 100%;
+  height: 220px;
   overflow: hidden;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.slide-content.slide-clickable:hover {
-  transform: scale(1.02);
-  opacity: 0.95;
 }
 
 .slide-image {
   width: 100%;
-  height: 100%;
+  height: 115%;
   object-fit: cover;
+  display: block;
+  transform: translate3d(0, var(--parallax-y), 0) scale(1);
+  transition: transform 0.4s ease-out;
+  will-change: transform;
+}
+
+.swiper-slide-active .slide-image {
+  animation: kenBurns 14s ease-out forwards;
+}
+
+@keyframes kenBurns {
+  0% { transform: translate3d(0, var(--parallax-y), 0) scale(1); }
+  100% { transform: translate3d(0, var(--parallax-y), 0) scale(1.08); }
+}
+
+.slide-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .slide-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  text-align: center;
+  inset: 0;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0.1)
+  );
+  color: var(--text-inverse);
+  z-index: 2;
+}
+
+.swiper-slide-active .slide-title,
+.swiper-slide-active .slide-description,
+.swiper-slide-active .slide-button {
+  animation: slideTextIn 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.swiper-slide-active .slide-description { animation-delay: 120ms; }
+.swiper-slide-active .slide-button { animation-delay: 240ms; }
+
+@keyframes slideTextIn {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(6px); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
 }
 
 .slide-title {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, #fff 0%, #ffe4b5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .slide-description {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.9;
+  display: none;
 }
 
 .slide-button {
-  background: #570015;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto var(--space-sm);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(135, 0, 58, 0.85), rgba(61, 0, 15, 0.85));
+  color: var(--text-inverse);
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.slide-button::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
 }
 
 .slide-button:hover {
-  background: #3d000f;
+  background: linear-gradient(135deg, #87003A, #c1004f);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(135, 0, 58, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
-.swiper-pagination-bullet {
-  width: 12px;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.5);
-  border: none;
+.slide-button:hover::before { left: 130%; }
+
+.slide-button-arrow {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+.slide-button:hover .slide-button-arrow {
+  transform: translateX(4px);
+}
+
+/* ===== TABLET & DESKTOP ===== */
+
+@media (min-width: 600px) {
+  .main-slider {
+    height: 600px;
+    border-radius: 0;
+  }
+
+  .slide-content {
+    height: 100%;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .slide-content.slide-clickable:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+
+  .slide-overlay {
+    bottom: 0;
+    top: auto;
+    padding: var(--space-2xl);
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.75),
+      transparent
+    );
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .slide-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+  }
+
+  .slide-description {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+    max-width: 800px;
+    line-height: 1.6;
+  }
+
+  .slide-button {
+    margin: 0;
+    padding: 14px 32px;
+    font-size: 1.1rem;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media (max-width: 600px) {
+  .slide-button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .slide-description {
+    display: none;
+  }
+
+  .slide-title {
+    text-align: center;
+  }
+}
+
+/* Pagination bullets */
+.main-slider .swiper-pagination-bullet {
+  background-color: rgba(255, 255, 255, 0.7);
   opacity: 1;
+  width: 8px;
+  height: 8px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.swiper-pagination-bullet-active {
-  background: #570015;
-  width: 24px;
-  border-radius: 10px;
+.main-slider .swiper-pagination-bullet.swiper-pagination-bullet-active {
+  background-color: var(--color-primary);
+  transform: scale(1.3);
 }

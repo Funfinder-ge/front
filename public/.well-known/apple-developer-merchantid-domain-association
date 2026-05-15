@@ -1,0 +1,28 @@
+PLACEHOLDER — REPLACE WITH THE FILE PROVIDED BY BANK OF GEORGIA.
+
+When using Bank of Georgia's external Apple Pay integration, BoG provides
+the validation certificate / domain-association file (it represents BoG's
+merchant identifier with Apple, since BoG is doing the merchant validation
+on the server side using their identity certificate).
+
+How to populate it:
+  1. Download the certificate from the link in BoG's developer documentation
+     (the page with "ჩამოტვირთეთ სერტიფიკატი აქ").
+  2. Replace this placeholder with the contents of the downloaded file.
+     Keep the filename exactly: apple-developer-merchantid-domain-association
+     (no extension, no leading whitespace, no trailing newline).
+  3. Deploy so the file is reachable at:
+       https://<your-domain>/.well-known/apple-developer-merchantid-domain-association
+     (HTTPS, no redirects, content-type doesn't matter to Apple).
+  4. Email ecommercemerchants@bog.ge with:
+       - your API Public Key
+       - the domain you want to host the Apple Pay button on
+     They'll associate your account with the domain on their end.
+
+Notes:
+  - You'll register one entry per domain (e.g. funfinder.ge, www.funfinder.ge,
+    staging.funfinder.ge). Use the same file across them.
+  - Some servers block dot-prefixed paths by default — make sure /.well-known/
+    is publicly reachable (CRA serves it from public/ by default; for an
+    nginx/Apache reverse proxy in front, allow `location /.well-known/`).
+  - Re-verification is required when BoG/Apple rotates the token (rare).

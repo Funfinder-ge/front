@@ -1,71 +1,104 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
+
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
+
 import './MainSlider.css';
 
-const MainSlider = ({ slides }) => {
-  const handleSlideClick = (link) => {
-    if (link) {
-      // Check if it's an external link (starts with http:// or https://)
-      if (link.startsWith('http://') || link.startsWith('https://')) {
-        window.open(link, '_blank', 'noopener,noreferrer');
-      } else {
-        // Internal link - could be used for React Router navigation if needed
-        window.location.href = link;
+const MainSlider = ({ slides = [] }) => {
+  const sliderRef = useRef(null);
+
+  useEffect(() => {
+    const node = sliderRef.current;
+    if (!node) return;
+    let ticking = false;
+    const update = () => {
+      const rect = node.getBoundingClientRect();
+      const offset = Math.max(-200, Math.min(200, -rect.top * 0.25));
+      node.style.setProperty('--parallax-y', `${offset}px`);
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
       }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const handleSlideClick = (link) => {
+    if (!link) return;
+
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      window.location.href = link;
     }
   };
 
   return (
-    <Swiper
-      modules={[Pagination, Autoplay]}
-      spaceBetween={30}
-      slidesPerView={1}
-      autoplay={{
-        delay: 5000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      }}
-      pagination={{
-        clickable: true,
-        renderBullet: (index, className) => {
-          return `<span class="${className}"></span>`;
-        },
-      }}
-      className="main-slider"
-    >
-      {slides.map((slide, index) => (
-        <SwiperSlide key={index}>
-          <div 
-            className={`slide-content ${slide.link ? 'slide-clickable' : ''}`}
-            onClick={() => handleSlideClick(slide.link)}
-            style={{ cursor: slide.link ? 'pointer' : 'default' }}
-          >
-            <img src={slide.image} alt={slide.title} className="slide-image" />
-            <div className="slide-overlay">
-              <h2 className="slide-title">{slide.title}</h2>
-              <p className="slide-description">{slide.description}</p>
-              {slide.link ? (
-                <button 
-                  className="slide-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSlideClick(slide.link);
-                  }}
-                >
-                  გაიგება მეტი
-                </button>
-              ) : (
-                <button className="slide-button">გაიგება მეტი</button>
-              )}
+    <div ref={sliderRef} className="main-slider-wrapper">
+      <Swiper
+        modules={[Pagination, Autoplay]}
+        slidesPerView={1}
+        spaceBetween={16}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+        pagination={{ clickable: true }}
+        className="main-slider"
+      >
+        {slides.map((slide, index) => (
+          <SwiperSlide key={index}>
+            <div
+              className={`slide-content ${slide.link ? 'slide-clickable' : ''}`}
+              onClick={() => handleSlideClick(slide.link)}
+            >
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="slide-image"
+                loading="lazy"
+              />
+              <div className="slide-vignette" />
+
+              <div className="slide-overlay">
+                {slide.title && (
+                  <h2 className="slide-title">{slide.title}</h2>
+                )}
+
+                {slide.description && (
+                  <p className="slide-description">
+                    {slide.description}
+                  </p>
+                )}
+
+                {slide.link && (
+                  <button
+                    className="slide-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSlideClick(slide.link);
+                    }}
+                  >
+                    <span className="slide-button-label">Learn More</span>
+                    <span className="slide-button-arrow">→</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };
 

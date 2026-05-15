@@ -8,7 +8,7 @@ const PaymentButton = ({
   fullWidth = false, 
   size = "medium",
   sx = {},
-  children = "დაჯავშნა"
+  children = "Book Now"
 }) => {
   const navigate = useNavigate();
 
@@ -22,6 +22,8 @@ const PaymentButton = ({
             name: tour.name,
             image: tour.primary_image?.image || tour.images?.[0]?.image || tour.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80',
             base_price: tour.base_price || tour.price,
+            discounted_price: tour.discounted_price ?? tour.price_per_person ?? tour.base_price ?? tour.price,
+            current_discount: tour.current_discount || null,
             duration: tour.duration,
             location: tour.city?.name || tour.location || tour.city,
             description: tour.description,
@@ -47,7 +49,7 @@ const PaymentButton = ({
       onClick={handleBooking}
       sx={{ 
         borderRadius: 2,
-        backgroundColor: variant === 'contained' ? '#570015' : undefined,
+        backgroundColor: variant === 'contained' ? '#87003A' : undefined,
         '&:hover': { 
           backgroundColor: variant === 'contained' ? '#3d000f' : undefined 
         },

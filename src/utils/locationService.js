@@ -25,7 +25,7 @@ class LocationService {
    */
   async requestLocationPermission() {
     if (!this.isSupported) {
-      throw new Error('მდებარეობის სერვისები ამ ბრაუზერით არ არის მხარდაჭერილი');
+      throw new Error('Location services are not supported by this browser');
     }
 
     try {
@@ -66,17 +66,17 @@ class LocationService {
           resolve(this.currentPosition);
         },
         (error) => {
-          let errorMessage = 'უცნობი შეცდომა მოხდა';
+          let errorMessage = 'An unknown error occurred';
           
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = 'მდებარეობის წვდომა უარყოფილია მომხმარებლის მიერ';
+              errorMessage = 'Location access was denied by the user';
               break;
             case error.POSITION_UNAVAILABLE:
-              errorMessage = 'მდებარეობის ინფორმაცია ხელმისაწვდომი არ არის';
+              errorMessage = 'Location information is unavailable';
               break;
             case error.TIMEOUT:
-              errorMessage = 'მდებარეობის მოთხოვნა დრო ამოეწურა';
+              errorMessage = 'The location request timed out';
               break;
           }
           

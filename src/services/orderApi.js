@@ -139,7 +139,7 @@ class OrderApiService {
       console.log('Current cookies:', document.cookie);
       
       // Try to create order
-      const response = await this.makeRequest(`/en/api/v5/order/create`, {
+      const response = await this.makeRequest(`/api/v5/order/create`, {
         method: 'POST',
         body: JSON.stringify(orderPayload),
       });
@@ -198,19 +198,88 @@ class OrderApiService {
   }
 
   /**
+   * Get order details by order number
+   * @param {string} orderNumber - Order number
+   * @returns {Promise<Object>} Order details
+   */
+  async getOrderDetailsByNumber(orderNumber) {
+    try {
+      console.log('Fetching order details for order number:', orderNumber);
+      
+      // Try multiple endpoints in case one fails
+      const endpoints = [
+        `/api/v5/orders/${orderNumber}`,
+        `/api/v5/order/${orderNumber}`,
+        `/api/v5/order/details/${orderNumber}`,
+        `/api/v5/order/by-number/${orderNumber}`
+      ];
+      
+      let lastError = null;
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.makeRequest(endpoint, 'GET');
+          
+          if (response && (response.data || response)) {
+            console.log('Successfully fetched order details from:', endpoint);
+            return response;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch from ${endpoint}:`, error.message);
+          lastError = error;
+          continue;
+        }
+      }
+      
+      // If all endpoints failed, try fetching from order feed and filtering
+      try {
+        console.log('Trying to fetch from order feed as fallback...');
+        const feed = await this.getOrderFeed();
+        const orders = Array.isArray(feed) ? feed : (feed?.orders || feed?.data || []);
+        const order = orders.find(o => 
+          o.order_number === orderNumber || 
+          o.number === orderNumber || 
+          o.id === orderNumber
+        );
+        
+        if (order) {
+          console.log('Found order in feed:', order);
+          return { data: order };
+        }
+      } catch (feedError) {
+        console.warn('Failed to fetch from order feed:', feedError);
+      }
+      
+      // If all methods failed, throw the last error
+      throw lastError || new Error('Failed to fetch order details from all endpoints');
+    } catch (error) {
+      console.error('Error fetching order details by number:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Initiate payment for an order
    * @param {string} orderNumber - Order number
+   * @param {string} paymentMethod - Payment method ('card', 'bog_p2p', 'bog_loyalty', etc.)
    * @returns {Promise<Object>} Payment initiation response
    */
-  async initiatePayment(orderNumber) {
+  async initiatePayment(orderNumber, paymentMethod = 'card') {
     try {
       console.log('Initiating payment for order:', orderNumber);
-      console.log('Calling endpoint: /en/api/v5/payment/bog/initiate');
-      console.log('Request payload:', { order_number: orderNumber });
+      console.log('Payment method:', paymentMethod);
+      console.log('Calling endpoint: /api/v5/payment/bog/initiate');
       
-      const response = await this.makeRequest(`/en/api/v5/payment/bog/initiate`, {
+      const payload = {
+        order_number: orderNumber,
+        method: paymentMethod  // Backend expects 'method', not 'payment_method'
+      };
+      
+      console.log('Request payload:', payload);
+      
+      const response = await this.makeRequest(`/api/v5/payment/bog/initiate`, {
         method: 'POST',
-        body: JSON.stringify({ order_number: orderNumber }),
+        body: JSON.stringify(payload),
       });
       
       console.log('HTTP Status:', response.status || 'No status');
@@ -250,6 +319,50 @@ class OrderApiService {
       return paymentData || response;
     } catch (error) {
       console.error('Error initiating payment:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      
+      // Add specific error context for payment initiation
+      if (error.message && error.message.includes('404')) {
+        console.error('BOG initiate endpoint not found - check if backend is running');
+        throw new Error('Payment service not available. Please check if the backend server is running and the BOG payment endpoint is accessible.');
+      } else if (error.message && error.message.includes('Network error')) {
+        console.error('Network connectivity issue');
+        throw new Error('Unable to connect to payment service. Please check your internet connection.');
+      } else if (error.message && error.message.includes('HTTP 4')) {
+        console.error('Client error - possibly invalid request format');
+        throw new Error('Invalid payment request. Please check the order number and payment method.');
+      } else if (error.message && error.message.includes('HTTP 5')) {
+        console.error('Server error - backend issue');
+        throw new Error('Payment server error. Please try again later.');
+      }
+      
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Handle BOG payment callback
+   * @param {Object} callbackData - Callback data from BOG payment gateway
+   * @returns {Promise<Object>} Callback processing response
+   */
+  async handleBOGCallback(callbackData) {
+    try {
+      console.log('Processing BOG payment callback:', callbackData);
+      console.log('Calling endpoint: /api/v5/payment/bog/callback');
+      
+      const response = await this.makeRequest(`/api/v5/payment/bog/callback`, {
+        method: 'POST',
+        body: JSON.stringify(callbackData),
+      });
+      
+      console.log('BOG callback response:', response);
+      return response.data;
+    } catch (error) {
+      console.error('Error processing BOG callback:', error);
       throw this.handleError(error);
     }
   }
@@ -261,10 +374,72 @@ class OrderApiService {
    */
   async getPaymentStatus(orderNumber) {
     try {
-      const response = await this.makeRequest(`/api/v5/payment/status/${orderNumber}`);
+      const response = await this.makeRequest(`/api/v5/payment/bog/status/${orderNumber}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching payment status:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Update payment status for an order
+   * @param {string} orderNumber - Order number
+   * @param {string} status - Payment status ('Paid', 'Failed', 'Pending', 'Processing', 'Refunded')
+   * @param {Object} paymentDetails - Additional payment details
+   * @returns {Promise<Object>} Updated order data
+   */
+  async updatePaymentStatus(orderNumber, status, paymentDetails = {}) {
+    try {
+      const paymentData = {
+        order_number: orderNumber,
+        payment_status: status,
+        payment_method: paymentDetails.method,
+        transaction_id: paymentDetails.transactionId,
+        payment_details: paymentDetails,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Updating payment status:', paymentData);
+      
+      let endpoint;
+      
+      // Use different endpoints based on payment method
+      if (paymentDetails.method === 'bog_p2p') {
+        // For BOG payments, use the callback endpoint to update status
+        endpoint = `/api/v5/payment/bog/callback`;
+      } else {
+        // For other payment methods, try the general payment status update endpoint
+        endpoint = `/api/v5/payment/update-status`;
+      }
+      
+      const response = await this.makeRequest(endpoint, {
+        method: 'POST',
+        body: JSON.stringify(paymentData),
+      });
+      
+      console.log('Payment status update response:', response);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      
+      // If the payment status update endpoint fails for non-BOG payments
+      if (paymentDetails.method !== 'bog_p2p' && 
+          (error.message?.includes('404') || error.message?.includes('Not Found'))) {
+        console.log('Payment update-status endpoint not found for non-BOG payment');
+        
+        // For non-BOG payments, we might need to handle this differently
+        // For now, just log the error and don't crash the payment flow
+        console.warn('Payment status update failed, but continuing payment flow');
+        return { success: false, message: 'Payment status update not available' };
+      }
+      
+      // For BOG payments, if callback fails, it's a critical error
+      if (paymentDetails.method === 'bog_p2p') {
+        console.error('BOG payment callback failed - critical error');
+        throw new Error(`BOG payment callback failed: ${error.message}`);
+      }
+      
       throw this.handleError(error);
     }
   }
@@ -396,14 +571,11 @@ class OrderApiService {
   }
 
   /**
-   * Validate date format (YYYY-MM-DD)
-   * @param {string} date - Date to validate
-   * @returns {boolean} Is valid date
+   * Validate date string
+   * @param {string} date - Date string to validate
+   * @returns {boolean} Whether date is valid
    */
   isValidDate(date) {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(date)) return false;
-    
     const parsedDate = new Date(date);
     return parsedDate instanceof Date && !isNaN(parsedDate);
   }
