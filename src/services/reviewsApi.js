@@ -1,29 +1,27 @@
 /**
  * Reviews API client. Hits the v3 customer review endpoints.
- * List is public; create requires a session cookie (sent via credentials: include).
+ *   GET  /event/<id>/list   — public
+ *   POST /event/<id>/create — requires customer_session_token cookie
  */
 
 const BASE_URL = 'https://base.funfinder.ge/en/api/v3/review';
 
-async function request(endpoint, options = {}) {
-  const url = `${BASE_URL}${endpoint}`;
-  const config = {
+async function request(endpoint, { headers, ...options } = {}) {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    credentials: 'include',
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      ...(options.headers || {}),
+      ...(headers || {}),
     },
-    credentials: 'include',
-    ...options,
-  };
+  });
 
-  const response = await fetch(url, config);
   let body = null;
-  try { body = await response.json(); } catch { body = null; }
+  try { body = await response.json(); } catch { /* empty body */ }
 
   if (!response.ok) {
-    const message = body?.detail || body?.message || `HTTP ${response.status}`;
-    const err = new Error(message);
+    const err = new Error(body?.detail || body?.message || `HTTP ${response.status}`);
     err.status = response.status;
     err.body = body;
     throw err;
@@ -34,10 +32,10 @@ async function request(endpoint, options = {}) {
 const reviewsApi = {
   listForEvent: (eventId) => request(`/event/${eventId}/list`),
 
-  create: (eventId, payload) =>
+  create: (eventId, { rating, comment = '' }) =>
     request(`/event/${eventId}/create`, {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ rating, comment }),
     }),
 };
 
