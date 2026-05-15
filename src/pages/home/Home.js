@@ -375,7 +375,7 @@ export const Home = () => {
           description: event.description || "",
           latitude: parseFloat(lat),
           longitude: parseFloat(lng),
-          rating: event.rating || 0,
+          rating: event.average_rating || 0,
           duration: event.duration || "",
           category: event.category?.name || event.category || "",
           address: event.city?.name || event.location || "",
@@ -1970,7 +1970,7 @@ export const Home = () => {
 
                               <Box display="flex" alignItems="center" mb={2}>
                                 <Rating
-                                  value={event.rating || 0}
+                                  value={event.average_rating || 0}
                                   precision={0.1}
                                   size="small"
                                   readOnly
@@ -1980,7 +1980,7 @@ export const Home = () => {
                                   color="text.secondary"
                                   ml={1}
                                 >
-                                  ({event.reviews || 0})
+                                  ({event.rating_count || 0})
                                 </Typography>
                               </Box>
 
@@ -2251,7 +2251,7 @@ export const Home = () => {
 
                       <Box display="flex" alignItems="center" mb={2}>
                         <Rating
-                          value={event.rating || 0}
+                          value={event.average_rating || 0}
                           precision={0.1}
                           size="small"
                           readOnly
@@ -2261,7 +2261,7 @@ export const Home = () => {
                           color="text.secondary"
                           ml={1}
                         >
-                          ({event.reviews || 0})
+                          ({event.rating_count || 0})
                         </Typography>
                       </Box>
 

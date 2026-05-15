@@ -331,13 +331,13 @@ const SeaOther = () => {
 
                   <Box display="flex" alignItems="center" mb={2}>
                     <Rating
-                      value={tour.rating || 4.5}
+                      value={tour.average_rating || 0}
                       precision={0.1}
                       size="small"
                       readOnly
                     />
                     <Typography variant="body2" color="text.secondary" ml={1}>
-                      ({tour.reviews || 0})
+                      ({tour.rating_count || 0})
                     </Typography>
                   </Box>
 

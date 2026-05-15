@@ -207,7 +207,10 @@ const EventReviews = ({ eventId }) => {
     setError('');
     try {
       const saved = await reviewsApi.create(eventId, values);
-      setReviews((prev) => [saved, ...prev]);
+      setReviews((prev) => {
+        const without = prev.filter((r) => r.id !== saved.id);
+        return [saved, ...without];
+      });
     } catch (e) {
       setError(e.message || 'Failed to save review');
     } finally {

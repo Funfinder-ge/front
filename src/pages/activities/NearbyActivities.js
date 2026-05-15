@@ -469,13 +469,13 @@ const NearbyActivities = () => {
 
                     <Box display="flex" alignItems="center" mb={2}>
                       <Rating
-                        value={activity.rating || 4.5}
+                        value={activity.average_rating || 0}
                         precision={0.1}
                         size="small"
                         readOnly
                       />
                       <Typography variant="body2" color="text.secondary" ml={1}>
-                        ({activity.reviews || 0})
+                        ({activity.rating_count || 0})
                       </Typography>
                     </Box>
 
